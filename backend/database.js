@@ -1,39 +1,26 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/BiteBoardDB', {
+// Connection URI. Replace "BiteBoardDB" with your database name.
+const mongoURI = 'mongodb://localhost/BiteBoardDB';
+
+// Connect to MongoDB
+mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true, // Only if you're using MongoDB versions that support collection indexing.
 });
 
 const db = mongoose.connection;
+
+// Error handler for MongoDB connection
 db.on('error', console.error.bind(console, 'connection error:'));
+
+// Confirmation once the connection is open
 db.once('open', function () {
     console.log('Connected successfully to MongoDB');
 });
 
-// User Schema for the 'users' collection
-const userSchema = new mongoose.Schema({
-    username: String,
-    email: String,
-    password: String,
-});
-
-const User = mongoose.model('User', userSchema);
-
-// Post Schema for the 'posts' collection
-const postSchema = new mongoose.Schema({
-    title: String,
-    content: String,
-    author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-});
-
-const Post = mongoose.model('Post', postSchema);
-
-// Export both models
-module.exports = { User, Post };
-
-
+// Optional: Export the database connection to be used elsewhere in the application
+module.exports = db;
 
