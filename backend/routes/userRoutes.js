@@ -156,8 +156,7 @@ router.patch('/profile/:id', authenticateToken, async (req, res) => {
 });
 
 
-module.exports = {
-    router,
-    authenticateToken
-};
+module.exports = router; // Default export of the router
+module.exports.authenticateToken = authenticateToken; // Named export of the authenticateToken
+
 

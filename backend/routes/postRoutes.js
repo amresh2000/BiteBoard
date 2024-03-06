@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
-const authenticateToken = require('./userRoutes').authenticateToken;
+const { authenticateToken } = require('./userRoutes');
 
 // Create a new post
 router.post('/', authenticateToken, async (req, res) => {
@@ -67,6 +67,21 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+// Get all posts by userID in descending order
+router.get('/user/:id', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const posts = await Post.find({ author: userId }).sort({ createdAt: -1 });
+        if (!posts) {
+            return res.status(404).send('Post not found or user not authorized');
+        }
+        res.send(posts);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
 
 // Like and unlike a post by ID
 router.patch('/like/:id', authenticateToken, async (req, res) => {
