@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Image, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -8,6 +9,14 @@ function LoginScreen({ navigation }) {
 
     const togglePasswordVisibility = () => {
         setPasswordVisibility(!passwordVisibility);
+    };
+
+    const storeToken = async (token) => {
+        try {
+            await AsyncStorage.setItem('userToken', token);
+        } catch (error) {
+            console.log('Error saving the token', error);
+        }
     };
 
     const handleLogin = async () => {
@@ -25,7 +34,7 @@ function LoginScreen({ navigation }) {
 
             const data = await response.json();
             if (response.status === 200) {
-                // Navigate to Home Screen or store the token as needed
+                await storeToken(data.token); // Assuming the token is returned as `data.token`
                 navigation.navigate('Home');
             } else {
                 // Handle login failure
@@ -92,3 +101,4 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+

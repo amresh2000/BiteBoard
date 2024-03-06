@@ -115,9 +115,48 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Get user profile
+router.get('/profile/:id', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+        const { username, bio, profileImageUrl } = user;
+        res.send({ username, bio, profileImageUrl });
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// Update user profile
+router.patch('/profile/:id', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const authenticatedUserId = req.user.userId;
+
+        // Check if the authenticated user is the same as the user being updated
+        if (userId !== authenticatedUserId) {
+            return res.status(403).send({ message: "Unauthorized access" });
+        }
+
+        const { bio, profileImageUrl } = req.body;
+
+        // Update the user's bio and profileImageUrl
+        const updatedUser = await User.findByIdAndUpdate(userId, { bio, profileImageUrl }, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        res.send(updatedUser);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
 
 
+module.exports = router; // Default export of the router
+module.exports.authenticateToken = authenticateToken; // Named export of the authenticateToken
 
 
-
-module.exports = router;
