@@ -39,18 +39,6 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
-// Get a user by ID
-router.get('/:id', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).send();
-        }
-        res.send(user);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
 
 // Update a user
 router.patch('/:id', authenticateToken, async (req, res) => {
@@ -108,7 +96,7 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' } // Token expires in 24 hours
         );
-        res.status(200).send({ token });
+        res.status(200).send({ token, userId: user._id.toString() });
     } catch (error) {
         console.log('Login error:', error);
         res.status(500).send(error);
@@ -128,6 +116,7 @@ router.get('/profile/:id', authenticateToken, async (req, res) => {
         res.status(500).send(error);
     }
 });
+
 
 // Update user profile
 router.patch('/profile/:id', authenticateToken, async (req, res) => {
@@ -150,6 +139,19 @@ router.patch('/profile/:id', authenticateToken, async (req, res) => {
         }
 
         res.send(updatedUser);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// Get a user by ID
+router.get('/:id', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).send();
+        }
+        res.send(user);
     } catch (error) {
         res.status(500).send(error);
     }

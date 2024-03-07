@@ -27,23 +27,27 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const authContext = {
-        signIn: async (token) => { // Now expects a token string directly
+        signIn: async (data) => { // Now expects a token string directly
+            console.log("Login response data:", data);
             try {
+                const { token, userId } = data; // Destructure token and userId from data
                 await AsyncStorage.setItem('userToken', token); // Store the token
+                await AsyncStorage.setItem('userId', userId.toString()); // Store the userId
                 setUserToken(token); // Update state with the new token
-                console.log("Token set after login:", token); // Logging the token set after login
+                console.log("Token and userId set after login:", token, userId);
             } catch (error) {
-                console.error("Error setting user token in signIn:", error);
+                console.error("Error setting user token and userId in signIn:", error);
                 // Consider handling this error (e.g., by showing an alert or retrying)
             }
         },
         signOut: async () => {
             try {
                 await AsyncStorage.removeItem('userToken'); // Remove the token from storage
+                await AsyncStorage.removeItem('userId'); // Remove the userId
                 setUserToken(null); // Update state to reflect user logout
-                console.log("Token removed after logout"); // Logging the token removal after logout
+                console.log("Token and userId removed after logout");
             } catch (error) {
-                console.error("Error removing user token in signOut:", error);
+                console.error("Error removing user token and userId in signOut:", error);
                 // Consider handling this error
             }
         },
