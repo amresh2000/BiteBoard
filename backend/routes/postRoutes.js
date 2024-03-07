@@ -2,12 +2,26 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 const { authenticateToken } = require('./userRoutes');
+const multer = require('multer');
 
-// Create a new post
-router.post('/', authenticateToken, async (req, res) => {
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // ensure this directory exists
+    },
+    filename: function (req, file, cb) {
+        cb(null, new Date().toISOString() + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Create a new post with image upload
+router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
     const post = new Post({
         ...req.body,
-        author: req.user.userId // Assuming JWT token contains userId
+        author: req.user.userId, // Assuming JWT token contains userId
+        imageUrl: req.file.path // Store the path of the uploaded file
     });
     try {
         await post.save();
@@ -27,7 +41,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Protected routes below require the authenticateToken middleware
 
 // Get a post by ID
 router.get('/:id', authenticateToken, async (req, res) => {

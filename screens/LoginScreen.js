@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Image, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './AuthContext';
 
 function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -19,6 +20,8 @@ function LoginScreen({ navigation }) {
         }
     };
 
+    const { signIn } = useAuth(); // Destructure signIn from useAuth
+
     const handleLogin = async () => {
         try {
             const response = await fetch('http://10.0.2.2:3000/api/users/login', {
@@ -32,18 +35,48 @@ function LoginScreen({ navigation }) {
                 }),
             });
 
-            const data = await response.json();
+            const data = await response.json(); // Attempt to parse JSON regardless of response status
+            console.log("Response data:", data); // Log the response data for debugging
+
             if (response.status === 200) {
-                await storeToken(data.token); // Assuming the token is returned as `data.token`
-                navigation.navigate('Home');
+                await signIn(data.token);
             } else {
-                // Handle login failure
-                Alert.alert('Login Failed', data.message || 'An error occurred');
+                // More detailed error message based on response status or data
+                Alert.alert('Login Failed', data.message || `An error occurred with status code ${response.status}`);
             }
         } catch (error) {
-            Alert.alert('Error', 'An error occurred during login');
+            console.error('Login Error:', error); // Log the detailed error
+            Alert.alert('Error', 'An error occurred during login. Please check the console for more details.');
         }
     };
+
+
+    // const handleLogin = async () => {
+    //     try {
+    //         const response = await fetch('http://10.0.2.2:3000/api/users/login', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 email,
+    //                 password,
+    //             }),
+    //         });
+
+    //         const data = await response.json();
+    //         if (response.status === 200) {
+    //             await storeToken(data.token); // Assuming the token is returned as `data.token`
+    //             console.log("Login successful, token stored:", data.token); // Logging the successful storage of token
+    //             navigation.navigate('Home');
+    //         } else {
+    //             // Handle login failure
+    //             Alert.alert('Login Failed', data.message || 'An error occurred');
+    //         }
+    //     } catch (error) {
+    //         Alert.alert('Error', 'An error occurred during login');
+    //     }
+    // };
 
     return (
         <View style={styles.container}>

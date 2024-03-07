@@ -19,6 +19,8 @@ db.once('open', function () {
 
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/uploads', express.static('uploads'));
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
