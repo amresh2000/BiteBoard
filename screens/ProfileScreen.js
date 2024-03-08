@@ -55,6 +55,8 @@ const ProfileScreen = () => {
 
     const fetchUserPosts = async () => {
         const token = await getToken();
+        const userId = await AsyncStorage.getItem('userId');
+        console.log(`${serverBaseURL}api/posts/user/${userId}`);
         if (!token) {
             Alert.alert("Error", "Token not found. Please login again.");
             return;
