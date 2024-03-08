@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, FlatList, Image, Dimensions, Alert } from 'reac
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Avatar } from 'react-native-elements';
 
+const serverBaseURL = 'http://10.0.2.2:3000/'; // or 'http://localhost:3000/' 
+
+
 const ProfileScreen = () => {
     const [userProfile, setUserProfile] = useState({
         username: '',
@@ -23,13 +26,15 @@ const ProfileScreen = () => {
 
     const fetchUserProfile = async () => {
         const token = await getToken();
+        const userId = await AsyncStorage.getItem('userId');
+        console.log(`${serverBaseURL}api/users/profile/${userId}`);
         if (!token) {
             Alert.alert("Error", "Token not found. Please login again.");
             return;
         }
 
         try {
-            const response = await fetch('http://10.0.2.2:3000/api/user/profile', {
+            const response = await fetch(`${serverBaseURL}api/users/profile/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -37,6 +42,7 @@ const ProfileScreen = () => {
             });
 
             const data = await response.json();
+            console.log("User Profile" + data);
             if (response.status === 200) {
                 setUserProfile(data);
             } else {
@@ -49,13 +55,15 @@ const ProfileScreen = () => {
 
     const fetchUserPosts = async () => {
         const token = await getToken();
+        const userId = await AsyncStorage.getItem('userId');
+        console.log(`${serverBaseURL}api/posts/user/${userId}`);
         if (!token) {
             Alert.alert("Error", "Token not found. Please login again.");
             return;
         }
 
         try {
-            const response = await fetch('http://10.0.2.2:3000/api/posts/user', {
+            const response = await fetch(`${serverBaseURL}api/posts/user/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -63,6 +71,7 @@ const ProfileScreen = () => {
             });
 
             const data = await response.json();
+            console.log("User Posts" + data);
             if (response.status === 200) {
                 setUserPosts(data);
             } else {
@@ -84,7 +93,7 @@ const ProfileScreen = () => {
                 <Avatar
                     size="large"
                     rounded
-                    source={{ uri: userProfile.profileImageUrl }}
+                    source={userProfile.profileImageUrl ? { uri: serverBaseURL + userProfile.profileImageUrl } : require('../assets/default-avatar.png')}
                 />
                 <Text style={styles.username}>{userProfile.username}</Text>
                 <Text style={styles.bio}>{userProfile.bio}</Text>
@@ -96,7 +105,7 @@ const ProfileScreen = () => {
                         <Image
                             style={styles.image}
                             resizeMode="cover"
-                            source={{ uri: item.imageUrl }}
+                            source={{ uri: serverBaseURL + item.imageUrl }}
                         />
                     </View>
                 )}

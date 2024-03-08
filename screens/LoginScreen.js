@@ -12,13 +12,14 @@ function LoginScreen({ navigation }) {
         setPasswordVisibility(!passwordVisibility);
     };
 
-    const storeToken = async (token) => {
+    const storeTokenAndUserId = async (token, userId) => {
         try {
             await AsyncStorage.setItem('userToken', token);
         } catch (error) {
-            console.log('Error saving the token', error);
+            console.log('Error saving the token or user ID', error);
         }
     };
+
 
     const { signIn } = useAuth(); // Destructure signIn from useAuth
 
@@ -39,7 +40,7 @@ function LoginScreen({ navigation }) {
             console.log("Response data:", data); // Log the response data for debugging
 
             if (response.status === 200) {
-                await signIn(data.token);
+                await signIn(data);
             } else {
                 // More detailed error message based on response status or data
                 Alert.alert('Login Failed', data.message || `An error occurred with status code ${response.status}`);
